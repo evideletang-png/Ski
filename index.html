@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offices de Tourisme — Stations de Ski France</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f3; color: #1a1a18; min-height: 100vh; }
+    header { background: #fff; border-bottom: 1px solid #e5e5e0; padding: 1.25rem 2rem; }
+    header h1 { font-size: 20px; font-weight: 600; }
+    header p { font-size: 13px; color: #6b6b66; margin-top: 4px; }
+    .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-left: 8px; vertical-align: middle; background: #dcfce7; color: #166534; }
+    .key-bar { background: #fffbeb; border-bottom: 1px solid #fde68a; padding: .875rem 2rem; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .key-bar label { font-size: 13px; color: #78350f; font-weight: 500; white-space: nowrap; }
+    .key-bar input { height: 34px; padding: 0 12px; border: 1px solid #fcd34d; border-radius: 8px; font-size: 13px; font-family: monospace; flex: 1; min-width: 260px; outline: none; background: #fff; }
+    .key-bar input:focus { border-color: #f59e0b; }
+    .key-bar button { height: 34px; padding: 0 18px; border: none; border-radius: 8px; background: #f59e0b; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+    .key-bar button:hover { background: #d97706; }
+    .key-bar a { font-size: 12px; color: #92400e; }
+    .controls { background: #fff; border-bottom: 1px solid #e5e5e0; padding: .875rem 2rem; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .controls input, .controls select { height: 36px; padding: 0 12px; border: 1px solid #d5d5cf; border-radius: 8px; background: #fff; color: #1a1a18; font-size: 13px; outline: none; }
+    .controls input:focus, .controls select:focus { border-color: #378ADD; }
+    .controls input { flex: 1; min-width: 180px; }
+    #searchBtn { height: 36px; padding: 0 20px; border: none; border-radius: 8px; background: #1a1a18; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; }
+    #searchBtn:hover { background: #333; }
+    .export-btn { height: 36px; padding: 0 16px; border: 1px solid #e5e5e0; border-radius: 8px; background: #fff; color: #1a1a18; font-size: 13px; cursor: pointer; margin-left: auto; }
+    main { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+    .stats { display: flex; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat { background: #fff; border: 1px solid #e5e5e0; border-radius: 10px; padding: 10px 18px; flex: 1; min-width: 110px; }
+    .stat-l { font-size: 11px; color: #6b6b66; margin-bottom: 2px; }
+    .stat-v { font-size: 22px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+    .card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 1.1rem 1.25rem; transition: border-color .15s; }
+    .card:hover { border-color: #b5b5af; }
+    .card.coords { border-left: 3px solid #1D9E75; border-radius: 0 12px 12px 0; }
+    .card-head { display: flex; gap: 12px; align-items: flex-start; }
+    .av { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+    .card-name { font-size: 14px; font-weight: 600; line-height: 1.35; margin-bottom: 3px; color: #1a1a18; }
+    .card-city { font-size: 11px; color: #6b6b66; }
+    .massif-tag { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 10px; background: #fef3c7; color: #92400e; margin-left: 5px; font-weight: 500; }
+    .divider { border: none; border-top: 1px solid #f0f0eb; margin: 10px 0; }
+    .info-rows { font-size: 12px; display: grid; gap: 5px; }
+    .info-row { display: flex; gap: 8px; align-items: flex-start; }
+    .info-label { color: #9b9b96; min-width: 75px; flex-shrink: 0; font-size: 11px; padding-top: 1px; }
+    .info-value { color: #1a1a18; word-break: break-word; }
+    .info-value a { text-decoration: none; }
+    .info-value a:hover { text-decoration: underline; }
+    .info-value.phone a { color: #0F6E56; font-weight: 500; }
+    .info-value.email a { color: #7c2d12; }
+    .info-value.site a { color: #185FA5; }
+    .no-coords { color: #b5b5af; font-style: italic; }
+    .pager { display: flex; gap: 6px; justify-content: center; margin-top: 2rem; flex-wrap: wrap; align-items: center; padding-bottom: 2rem; }
+    .pager button { height: 32px; padding: 0 14px; border: 1px solid #e5e5e0; border-radius: 8px; background: #fff; color: #1a1a18; font-size: 13px; cursor: pointer; }
+    .pager button:hover:not(:disabled) { background: #f5f5f3; }
+    .pager button:disabled { opacity: .35; cursor: not-allowed; }
+    .pager button.active { border-color: #378ADD; color: #185FA5; font-weight: 600; background: #eff6ff; }
+    .pager span { font-size: 13px; color: #6b6b66; }
+    .loader { padding: 4rem; text-align: center; color: #6b6b66; font-size: 14px; }
+    .spinner { width: 28px; height: 28px; border: 2px solid #e5e5e0; border-top-color: #378ADD; border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-box { padding: 1.5rem; background: #fee2e2; border-radius: 10px; color: #991b1b; font-size: 13px; line-height: 1.7; }
+    .welcome { padding: 3rem; text-align: center; color: #6b6b66; font-size: 14px; line-height: 1.8; }
+    @media (max-width: 600px) { header, .key-bar, .controls, main { padding-left: 1rem; padding-right: 1rem; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Offices de Tourisme — Stations de Ski France <span class="badge">DATAtourisme</span></h1>
+  <p>Source officielle : API DATAtourisme · Téléphone, email, site web · 100% gratuit</p>
+</header>
+
+<div class="key-bar">
+  <label>Clé API DATAtourisme :</label>
+  <input type="password" id="apiKey" placeholder="Obtenez votre clé gratuite sur info.datatourisme.fr/utiliser-les-donnees" />
+  <button onclick="loadData()">Charger les offices</button>
+  <a href="https://info.datatourisme.fr/utiliser-les-donnees" target="_blank">Obtenir une clé gratuite ↗</a>
+</div>
+
+<div class="controls">
+  <input type="text" id="searchInput" placeholder="Filtrer par nom, commune…" oninput="applyFilters()" />
+  <select id="massifSelect" onchange="applyFilters()">
+    <option value="">Tous les massifs</option>
+    <optgroup label="Alpes du Nord">
+      <option value="73">Savoie (73)</option>
+      <option value="74">Haute-Savoie (74)</option>
+      <option value="38">Isère (38)</option>
+    </optgroup>
+    <optgroup label="Alpes du Sud">
+      <option value="05">Hautes-Alpes (05)</option>
+      <option value="04">Alpes-de-Hte-Provence (04)</option>
+      <option value="06">Alpes-Maritimes (06)</option>
+    </optgroup>
+    <optgroup label="Pyrénées">
+      <option value="65">Hautes-Pyrénées (65)</option>
+      <option value="66">Pyr.-Orientales (66)</option>
+      <option value="09">Ariège (09)</option>
+      <option value="64">Pyr.-Atlantiques (64)</option>
+      <option value="31">Haute-Garonne (31)</option>
+    </optgroup>
+    <optgroup label="Massif Central">
+      <option value="63">Puy-de-Dôme (63)</option>
+      <option value="15">Cantal (15)</option>
+      <option value="48">Lozère (48)</option>
+    </optgroup>
+    <optgroup label="Vosges / Jura">
+      <option value="88">Vosges (88)</option>
+      <option value="25">Doubs (25)</option>
+      <option value="39">Jura (39)</option>
+    </optgroup>
+  </select>
+  <select id="coordsFilter" onchange="applyFilters()">
+    <option value="">Tous les résultats</option>
+    <option value="1">Avec coordonnées uniquement</option>
+  </select>
+  <button class="export-btn" onclick="exportCSV()">⬇ Exporter CSV</button>
+</div>
+
+<main>
+  <div class="stats" id="statsBar" style="display:none">
+    <div class="stat"><div class="stat-l">Offices trouvés</div><div class="stat-v" id="statTotal">—</div></div>
+    <div class="stat"><div class="stat-l">Avec téléphone</div><div class="stat-v" id="statPhone">—</div></div>
+    <div class="stat"><div class="stat-l">Avec email</div><div class="stat-v" id="statEmail">—</div></div>
+    <div class="stat"><div class="stat-l">Avec site web</div><div class="stat-v" id="statSite">—</div></div>
+  </div>
+  <div id="content">
+    <div class="welcome">
+      Entrez votre clé API DATAtourisme (gratuite) et cliquez <strong>Charger les offices</strong>.<br>
+      L'annuaire affichera les offices de tourisme des stations de ski françaises<br>
+      avec leur téléphone, email et site web officiels.
+    </div>
+  </div>
+  <div id="pagination"></div>
+</main>
+
+<script>
+  const PER_PAGE = 24;
+  const MOUNTAIN_DEPTS = ['04','05','06','09','15','25','31','38','39','48','63','64','65','66','73','74','88'];
+  const MASSIF = { '38':'Isère','73':'Savoie','74':'Hte-Savoie','04':'AlpesHP','05':'HtesAlpes','06':'AlpesMar','09':'Ariège','31':'HteGaronne','65':'HtesPyr','66':'PyrOr','64':'PyrAtl','48':'Lozère','63':'PuydeDôme','15':'Cantal','88':'Vosges','25':'Doubs','39':'Jura' };
+  const BASE = 'https://api.datatourisme.fr/v1';
+  const OT_KW = ['office de tourisme','office du tourisme','syndicat d\'initiative','maison du tourisme','bureau d\'information touristique','bureau d\'accueil'];
+  const COLORS = [{bg:'#dbeafe',c:'#1e40af'},{bg:'#d1fae5',c:'#065f46'},{bg:'#ede9fe',c:'#4c1d95'},{bg:'#fef3c7',c:'#92400e'},{bg:'#fce7f3',c:'#831843'},{bg:'#dcfce7',c:'#14532d'},{bg:'#ffedd5',c:'#7c2d12'},{bg:'#e0f2fe',c:'#0c4a6e'}];
+
+  let rawData = [], currentPage = 1;
+
+  function col(n) { let h=0; for(let c of n) h=(h*31+c.charCodeAt(0))&0xFFFFFF; return COLORS[Math.abs(h)%COLORS.length]; }
+  function ini(n) { return n.replace(/[^a-zA-ZÀ-ÿ]/g,' ').split(/\s+/).filter(w=>w.length>1).slice(0,2).map(w=>w[0].toUpperCase()).join('')||n.slice(0,2).toUpperCase(); }
+  function esc(s) { return String(s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+  function v(x) { return x&&String(x).trim()||''; }
+
+  function getLabel(poi) {
+    const l = poi.label || {};
+    if (typeof l === 'string') return l;
+    return v(l['@fr'] || l.fr || Object.values(l).find(x => typeof x === 'string') || (Array.isArray(Object.values(l)[0]) ? Object.values(l)[0][0] : '') || '');
+  }
+
+  function getAddr(poi) {
+    for (const loc of (poi.isLocatedAt || [])) {
+      const a = loc.address || {};
+      const cp = v(a.postalCode || a['schema:postalCode'] || '');
+      if (!cp) continue;
+      const dept = cp.slice(0, 2);
+      const cityRaw = a.addressLocality || a['schema:addressLocality'] || a.hasAddressCity?.label || '';
+      const city = typeof cityRaw === 'string' ? cityRaw : (cityRaw?.['@fr'] || cityRaw?.fr || Object.values(cityRaw||{})[0] || '');
+      const streetRaw = a.streetAddress || a['schema:streetAddress'] || '';
+      const street = typeof streetRaw === 'string' ? streetRaw : (streetRaw?.['@fr'] || streetRaw?.fr || '');
+      return { cp, dept, city: v(city), street: v(street) };
+    }
+    return { cp: '', dept: '', city: '', street: '' };
+  }
+
+  function getContact(poi) {
+    let phone = '', email = '', site = '';
+    for (const c of (poi.hasContact || [])) {
+      if (!phone) { const t = c.telephone || c['schema:telephone'] || ''; phone = Array.isArray(t) ? v(t[0]) : v(t); }
+      if (!email) { const m = c.email || c['schema:email'] || ''; email = Array.isArray(m) ? v(m[0]) : v(m); }
+      if (!site) {
+        const u = c['foaf:homepage'] || c.url || c['schema:url'] || '';
+        site = Array.isArray(u) ? v(u[0]) : v(u);
+        if (!site && c.hasUrl) { const hu = Array.isArray(c.hasUrl) ? c.hasUrl[0] : c.hasUrl; site = v(hu?.url || hu?.['schema:url'] || hu || ''); }
+      }
+    }
+    return { phone, email, site };
+  }
+
+  function isOfficeTourisme(poi) {
+    const types = poi.type || [];
+    const ta = Array.isArray(types) ? types : [types];
+    if (ta.some(t => String(t).toLowerCase().includes('touristinformation') || String(t).toLowerCase().includes('informationcenter'))) return true;
+    const n = getLabel(poi).toLowerCase();
+    return OT_KW.some(kw => n.includes(kw));
+  }
+
+  async function apiFetch(path, params) {
+    const key = document.getElementById('apiKey').value.trim();
+    const u = new URLSearchParams(params);
+    const res = await fetch(`${BASE}/${path}?${u}`, { headers: { 'X-API-Key': key, 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().then(t => t.slice(0, 200))}`);
+    return res.json();
+  }
+
+  async function loadData() {
+    const key = document.getElementById('apiKey').value.trim();
+    if (!key) { alert('Veuillez entrer votre clé API DATAtourisme.'); return; }
+    localStorage.setItem('dtKey', key);
+
+    rawData = [];
+    document.getElementById('content').innerHTML = '<div class="loader"><div class="spinner"></div><p>Chargement des données DATAtourisme…</p></div>';
+    document.getElementById('statsBar').style.display = 'none';
+    document.getElementById('pagination').innerHTML = '';
+
+    try {
+      // Requête 1 : filtre par type TouristInformationCenter
+      let found = 0;
+      for (let page = 1; page <= 4; page++) {
+        const d = await apiFetch('catalog', {
+          lang: 'fr', page_size: 250, page,
+          fields: 'uuid,label,type,isLocatedAt,hasContact',
+          filters: 'type[in]=TouristInformationCenter'
+        });
+        const total_pages = d.meta?.total_pages || 1;
+        for (const poi of (d.objects || [])) {
+          const addr = getAddr(poi);
+          if (!MOUNTAIN_DEPTS.includes(addr.dept)) continue;
+          const contact = getContact(poi);
+          rawData.push({ name: getLabel(poi), ...addr, ...contact });
+          found++;
+        }
+        if (page >= total_pages) break;
+      }
+
+      // Requête 2 : si peu de résultats, compléter avec recherche par nom
+      if (rawData.length < 20) {
+        const d2 = await apiFetch('catalog', {
+          lang: 'fr', page_size: 250, page: 1,
+          fields: 'uuid,label,type,isLocatedAt,hasContact',
+          search: 'office de tourisme'
+        });
+        for (const poi of (d2.objects || [])) {
+          if (!isOfficeTourisme(poi)) continue;
+          const addr = getAddr(poi);
+          if (!MOUNTAIN_DEPTS.includes(addr.dept)) continue;
+          const contact = getContact(poi);
+          rawData.push({ name: getLabel(poi), ...addr, ...contact });
+        }
+      }
+
+      // Dédupliquer et trier
+      const seen = new Set();
+      rawData = rawData.filter(r => {
+        const k = (r.name + r.cp).toLowerCase().replace(/\s/g, '');
+        if (seen.has(k)) return false;
+        seen.add(k); return true;
+      });
+      rawData.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+
+      applyFilters();
+    } catch (err) {
+      document.getElementById('content').innerHTML = `<div class="error-box"><strong>Erreur de connexion à l'API DATAtourisme</strong><br>${esc(err.message)}<br><br>Vérifiez votre clé API sur <a href="https://info.datatourisme.fr" target="_blank" style="color:#991b1b">info.datatourisme.fr</a></div>`;
+    }
+  }
+
+  function getFiltered() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const dept = document.getElementById('massifSelect').value;
+    const coordsOnly = document.getElementById('coordsFilter').value === '1';
+    return rawData.filter(r => {
+      if (dept && r.dept !== dept) return false;
+      if (coordsOnly && !r.phone && !r.email && !r.site) return false;
+      if (q) { const hay = (r.name + r.city + r.cp + (MASSIF[r.dept] || '')).toLowerCase(); if (!hay.includes(q)) return false; }
+      return true;
+    });
+  }
+
+  function applyFilters() {
+    currentPage = 1;
+    const f = getFiltered();
+    document.getElementById('statsBar').style.display = rawData.length ? 'flex' : 'none';
+    document.getElementById('statTotal').textContent = f.length.toLocaleString('fr-FR');
+    document.getElementById('statPhone').textContent = f.filter(r => r.phone).length.toLocaleString('fr-FR');
+    document.getElementById('statEmail').textContent = f.filter(r => r.email).length.toLocaleString('fr-FR');
+    document.getElementById('statSite').textContent = f.filter(r => r.site).length.toLocaleString('fr-FR');
+    renderPage(1, f);
+  }
+
+  function renderPage(page, filtered) {
+    currentPage = page;
+    filtered = filtered || getFiltered();
+    if (!filtered.length) {
+      document.getElementById('content').innerHTML = '<div class="loader"><p>Aucun office trouvé pour ces critères.</p></div>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+    const slice = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+    const grid = document.createElement('div'); grid.className = 'grid';
+    slice.forEach(r => {
+      const m = MASSIF[r.dept] || '';
+      const hasC = r.phone || r.email || r.site;
+      const { bg, c } = col(r.name || '');
+      const card = document.createElement('div');
+      card.className = 'card' + (hasC ? ' coords' : '');
+      card.innerHTML = `
+        <div class="card-head">
+          <div class="av" style="background:${bg};color:${c}">${esc(ini(r.name || '?'))}</div>
+          <div style="flex:1;min-width:0">
+            <div class="card-name">${esc(r.name)}${m ? `<span class="massif-tag">${esc(m)}</span>` : ''}</div>
+            <div class="card-city">${r.cp ? esc(r.cp) + ' ' : ''}${esc(r.city)}</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="info-rows">
+          ${r.street ? `<div class="info-row"><span class="info-label">Adresse</span><span class="info-value">${esc(r.street)}</span></div>` : ''}
+          ${r.phone ? `<div class="info-row"><span class="info-label">Téléphone</span><span class="info-value phone"><a href="tel:${esc(r.phone.replace(/\s/g,''))}">${esc(r.phone)}</a></span></div>` : ''}
+          ${r.email ? `<div class="info-row"><span class="info-label">Email</span><span class="info-value email"><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></span></div>` : ''}
+          ${r.site ? `<div class="info-row"><span class="info-label">Site web</span><span class="info-value site"><a href="${esc(r.site)}" target="_blank">${esc(r.site.replace(/^https?:\/\//,'').replace(/\/$/,''))}</a></span></div>` : ''}
+          ${!r.phone && !r.email && !r.site ? `<div class="info-row"><span class="info-label">Coordonnées</span><span class="info-value no-coords">Non renseignées</span></div>` : ''}
+        </div>`;
+      grid.appendChild(card);
+    });
+    document.getElementById('content').innerHTML = '';
+    document.getElementById('content').appendChild(grid);
+    renderPagination(filtered);
+  }
+
+  function renderPagination(filtered) {
+    const pages = Math.ceil(filtered.length / PER_PAGE);
+    if (pages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+    const s = Math.max(1, Math.min(currentPage - 2, pages - 4)), end = Math.min(pages, s + 4);
+    let h = `<button onclick="renderPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>← Préc.</button>`;
+    for (let i = s; i <= end; i++) h += `<button class="${i === currentPage ? 'active' : ''}" onclick="renderPage(${i})">${i}</button>`;
+    h += `<span>/ ${pages}</span><button onclick="renderPage(${currentPage + 1})" ${currentPage >= pages ? 'disabled' : ''}>Suiv. →</button>`;
+    document.getElementById('pagination').innerHTML = h;
+  }
+
+  function exportCSV() {
+    const f = getFiltered();
+    if (!f.length) { alert('Aucune donnée à exporter.'); return; }
+    const H = ['Nom','Code Postal','Commune','Département','Massif','Adresse','Téléphone','Email','Site web'];
+    const R = f.map(r => [r.name,r.cp,r.city,r.dept,MASSIF[r.dept]||'',r.street,r.phone,r.email,r.site].map(x => `"${String(x||'').replace(/"/g,'""')}"`).join(';'));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\uFEFF' + [H.join(';'), ...R].join('\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'offices_tourisme_montagne.csv'; a.click();
+  }
+
+  // Restaurer la clé sauvegardée
+  const saved = localStorage.getItem('dtKey');
+  if (saved) document.getElementById('apiKey').value = saved;
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+</script>
+</body>
+</html>
